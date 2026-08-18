@@ -36,14 +36,14 @@ jobs:
         run: |
           set -euxo pipefail
           haxelib setup ~/haxelib
-          haxelib --never install hmm 4.1.0 || haxelib git hmm https://github.com/FunkinCrew/hmm funkin-patches
+          haxelib git hmm https://github.com/FunkinCrew/hmm funkin-patches
           haxelib run hmm install || (echo 'hmm install failed, retrying' && sleep 15 && haxelib run hmm install)
-          haxelib list | head -40
+          haxelib list | head -10
 
       - name: Setup HXCPP dev commit
         run: |
           set -euxo pipefail
-          cd ~/haxelib/hxcpp/git/tools/hxcpp && haxe compile.hxml && cd -
+          cd .haxelib/hxcpp/git/tools/hxcpp && haxe compile.hxml && cd -
 
       - name: Build iOS (release, unsigned)
         run: |
