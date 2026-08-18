@@ -1,0 +1,69 @@
+name: Build iOS (V-Slice)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  iosBuild:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Download game assets from Release
+        run: |
+          set -euxo pipefail
+          ASSET_URL=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/Aiden6652/funkin-ios/releases/372106548" | python3 -c "import json,sys; d=json.load(sys.stdin); print([a['url'] for a in d.get('assets',[]) if a['name']=='assets.zip'][0])")
+          for i in 1 2 3 4 5; do
+            curl -sL -H "Authorization: Bearer ${{ github.token }}" --max-time 300 -o assets.zip "$ASSET_URL" && [ -s assets.zip ] && echo "downloaded $(wc -c < assets.zip) bytes" && break
+            echo "assets download retry $i"; sleep 10
+          done
+          python3 - <<'PY'
+          import zipfile, os
+          with zipfile.ZipFile('assets.zip') as z:
+              z.extractall('.')
+          print('assets extracted:', len(os.listdir('assets')))
+          PY
+          rm -f assets.zip
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.7
+
+      - name: Install dependencies (hmm)
+        run: |
+          set -euxo pipefail
+          haxelib setup ~/haxelib
+          haxelib --never install hmm 4.1.0 || haxelib git hmm https://github.com/FunkinCrew/hmm funkin-patches
+          haxelib run hmm install || (echo 'hmm install failed, retrying' && sleep 15 && haxelib run hmm install)
+          haxelib list | head -40
+
+      - name: Setup HXCPP dev commit
+        run: |
+          set -euxo pipefail
+          cd ~/haxelib/hxcpp/git/tools/hxcpp && haxe compile.hxml && cd -
+
+      - name: Build iOS (release, unsigned)
+        run: |
+          set -euxo pipefail
+          touch .env
+          haxelib run lime build ios -v -release -nosign -DGITHUB_BUILD 2>&1 | tail -60
+          APP_PATH=$(find export -name "*.app" -type d | head -1)
+          echo "APP_PATH=$APP_PATH"
+          if [ -z "$APP_PATH" ]; then echo '=== No .app ==='; find export -maxdepth 6 -type d | head -30; exit 1; fi
+          mkdir -p Payload
+          cp -r "$APP_PATH" "Payload/Funkin.app"
+          codesign --force --sign - "Payload/Funkin.app" || true
+          zip -r "Funkin-release.ipa" Payload
+          rm -rf Payload
+          ls -lh *.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@main
+        with:
+          name: iosBuild-release
+          path: Funkin-release.ipa
+          if-no-files-found: error
