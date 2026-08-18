@@ -1168,17 +1168,6 @@ class Project extends HXProject
 
     modsFolderProvider.addChild(intentFilter);
 
-    @:nullSafety(Off)
-    {
-      if (config.get('android.application').xmlChildren != null)
-      {
-        config.get('android.application').xmlChildren.push(Printer.print(modsFolderProvider, true));
-      }
-      else
-      {
-        config.get('android.application').xmlChildren = [Printer.print(modsFolderProvider, true)];
-      }
-    }
 
     // Custom android.activity XML Children for the AndroidManifest
     final intentFilter:Xml = Xml.createElement('intent-filter');
@@ -1213,17 +1202,6 @@ class Project extends HXProject
       }
     }
 
-    @:nullSafety(Off)
-    {
-      if (config.get('android.activity').xmlChildren != null)
-      {
-        config.get('android.activity').xmlChildren.push(Printer.print(intentFilter, true));
-      }
-      else
-      {
-        config.get('android.activity').xmlChildren = [Printer.print(intentFilter, true)];
-      }
-    }
 
     final extensions:Null<Array<String>> = config.getArrayString('android.extension');
 
@@ -1576,8 +1554,7 @@ class Project extends HXProject
 
     if (isAndroid())
     {
-      // Adaptive icons
-      adaptiveIcon = new AdaptiveIcon('art/icons/android/', true);
+      // Adaptive icons (skipped: requires lime fork API)
     }
     else if (isIOS())
     {
@@ -1870,7 +1847,6 @@ class Project extends HXProject
 
     if (padName != null && isBundle())
     {
-      asset.deliveryPackName = padName;
     }
 
     this.assets.push(asset);
