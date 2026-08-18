@@ -376,6 +376,7 @@ class RegistryMacro
   static function listBaseGameEntryIds(dataFilePath:String):Array<Expr>
   {
     var result:Array<Expr> = [];
+    if (!sys.FileSystem.exists(dataFilePath)) return result;
     var files:Array<String> = sys.FileSystem.readDirectory(dataFilePath);
 
     for (file in files)
