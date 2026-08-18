@@ -1403,11 +1403,6 @@ class Project extends HXProject
     // Shared asset libraries
     addAssetLibrary("songs", shouldEmbed, shouldPreload);
 
-    for (song in EMBED_SONGS_AUDIO)
-    {
-      removeAssetPath('assets/songs/$song');
-      addAssetPath('assets/songs/$song', 'assets/songs/$song', "songs", ["*"], exclude, true, "assets");
-    }
 
     addAssetLibrary("shared", shouldEmbed, shouldPreload);
     addAssetPath("assets/shared", "assets/shared", "shared", ["*"], exclude, shouldEmbed, "assets");
