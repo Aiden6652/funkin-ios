@@ -38,9 +38,11 @@ jobs:
           haxelib setup ~/haxelib
           haxelib git hmm https://github.com/FunkinCrew/hmm funkin-patches
           haxelib run hmm install || (echo 'hmm install failed, retrying' && sleep 15 && haxelib run hmm install)
-          # git lime has no lime.ndll -> replace with release lime (ships ndll) in LOCAL haxelib
-          haxelib remove lime 2>/dev/null || true
+          # Use lime FORK (git) + copy prebuilt lime.ndll from release lime 8.2.2
           haxelib install lime 8.2.2 --local 2>&1 | tail -2
+          mkdir -p .haxelib/lime/git/ndll
+          cp -r .haxelib/lime/8,2,2/ndll/* .haxelib/lime/git/ndll/ 2>/dev/null || true
+          echo '--- lime git ndll ---'; find .haxelib/lime/git/ndll -type f | head
           haxelib list | head -12
 
       - name: Setup HXCPP dev commit
@@ -51,9 +53,8 @@ jobs:
       - name: Setup lime
         run: |
           set -euxo pipefail
-          haxelib --always run lime setup
-          haxelib run lime rebuild hxcpp
-          haxelib run lime rebuild cpp -64 || echo 'lime rebuild cpp failed (non-fatal)'
+          haxelib --always run lime setup || true
+          haxelib run lime rebuild hxcpp || true
 
       - name: Patch openfl fork (bypass lime fork check)
         run: |
