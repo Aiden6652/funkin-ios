@@ -1,7 +1,7 @@
 import os, sys
 
 root = sys.argv[1] if len(sys.argv) > 1 else '.haxelib'
-keywords = ["Lime has to be", "FunkinCrew's Fork", "FunkinCrew"]
+keywords = ["to be compiling", "got Lime", "Lime has to be"]
 found = []
 for dirpath, dirs, files in os.walk(root):
     for fn in files:
@@ -14,30 +14,29 @@ for dirpath, dirs, files in os.walk(root):
             continue
         for kw in keywords:
             if kw in s:
-                for i, ln in enumerate(s.split('\n')):
+                lines = s.split('\n')
+                for i, ln in enumerate(lines):
                     if kw in ln:
-                        found.append((p, i + 1, ln.strip()[:160]))
-                        print('MATCH', p, ':', i + 1, '=>', ln.strip()[:160])
+                        found.append((p, i + 1, ln.strip()[:200]))
+                        # 打印前后 3 行上下文
+                        ctx = lines[max(0, i - 3):i + 3]
+                        for c in ctx:
+                            print('CTX', p, '=>', c.strip()[:200])
+                        print('---')
                 break
 
-print('---')
-for p, ln, txt in found:
-    pass
-
-# 尝试 patch: 把含关键词的行的 error/throw/Log.error 换成 trace
+# patch: error/trace/Log.error -> trace（对含关键词行）
 changed = {}
 for p, ln, txt in found:
     if p not in changed:
         changed[p] = open(p, encoding='utf-8', errors='ignore').read().split('\n')
-
 for p, ln, txt in found:
     lines = changed[p]
     line = lines[ln - 1]
-    nline = line.replace('error(', 'trace(').replace('throw ', 'trace ').replace('Log.error', 'trace')
+    nline = line.replace('Log.error', 'trace').replace('error(', 'trace(').replace('throw ', 'trace ')
     if nline != line:
         lines[ln - 1] = nline
-        print('PATCHED', p, ln, '=>', nline.strip()[:120])
-
+        print('PATCHED', p, ln, '=>', nline.strip()[:150])
 for p, lines in changed.items():
     open(p, 'w', encoding='utf-8').write('\n'.join(lines))
 print('TOTAL_FOUND:', len(found))
