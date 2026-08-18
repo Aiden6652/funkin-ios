@@ -64,7 +64,7 @@ jobs:
           cd project
           haxelib run hxcpp Build.xml -Dmac -DHXCPP_ARM64 2>&1 | tail -40
           echo '--- rebuild iPhone liblime.a ---'
-          haxelib run hxcpp Build.xml -Diphone -DHXCPP_ARM64 2>&1 | tail -40
+          MACOSX_DEPLOYMENT_TARGET=12 haxelib run hxcpp Build.xml -Diphone -DHXCPP_ARM64 2>&1 | tail -40
           echo '--- ndll output ---'
           find ../ndll -name "*.ndll" -o -name "*.a" 2>/dev/null | head -20
 
