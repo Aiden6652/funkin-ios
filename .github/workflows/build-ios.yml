@@ -15,9 +15,8 @@ jobs:
       - name: Download game assets from Release
         run: |
           set -euxo pipefail
-          ASSET_URL=$(curl -s -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/Aiden6652/funkin-ios/releases/372106548" | python3 -c "import json,sys; d=json.load(sys.stdin); print([a['url'] for a in d.get('assets',[]) if a['name']=='assets.zip'][0])")
           for i in 1 2 3 4 5; do
-            curl -sL -H "Authorization: Bearer ${{ github.token }}" --max-time 300 -o assets.zip "$ASSET_URL" && [ -s assets.zip ] && echo "downloaded $(wc -c < assets.zip) bytes" && break
+            curl -sL --max-time 300 -o assets.zip "https://github.com/Aiden6652/funkin-ios/releases/download/assets-v1/assets.zip" && [ -s assets.zip ] && echo "downloaded $(wc -c < assets.zip) bytes" && break
             echo "assets download retry $i"; sleep 10
           done
           python3 - <<'PY'
