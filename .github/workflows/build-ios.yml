@@ -38,8 +38,9 @@ jobs:
           haxelib setup ~/haxelib
           haxelib git hmm https://github.com/FunkinCrew/hmm funkin-patches
           haxelib run hmm install || (echo 'hmm install failed, retrying' && sleep 15 && haxelib run hmm install)
-          # git lime has no lime.ndll -> install release lime (ships ndll) over it
-          haxelib install lime 8.2.2 --always 2>&1 | tail -2 || haxelib install lime --always 2>&1 | tail -2
+          # git lime has no lime.ndll -> replace with release lime (ships ndll) in LOCAL haxelib
+          haxelib remove lime 2>/dev/null || true
+          haxelib install lime 8.2.2 --local 2>&1 | tail -2
           haxelib list | head -12
 
       - name: Setup HXCPP dev commit
