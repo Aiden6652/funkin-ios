@@ -49,6 +49,7 @@ class CreditsDataMacro
     if (!sys.FileSystem.exists(creditsPath)) creditsPath = "../../../../../" + creditsPath;
     #end
 
+    if (!sys.FileSystem.exists(creditsPath)) return null;
     return sys.io.File.getContent(creditsPath);
   }
 
