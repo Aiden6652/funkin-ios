@@ -59,7 +59,7 @@ jobs:
         run: |
           set -euxo pipefail
           touch .env
-          haxelib run lime build ios -v -release -nosign -DGITHUB_BUILD 2>&1 | tail -60
+          haxelib run lime build ios -v -release -nosign -DGITHUB_BUILD -DNO_FEATURE_MOBILE_ADVERTISEMENTS 2>&1 | tail -60
           APP_PATH=$(find export -name "*.app" -type d | head -1)
           echo "APP_PATH=$APP_PATH"
           if [ -z "$APP_PATH" ]; then echo '=== No .app ==='; find export -maxdepth 6 -type d | head -30; exit 1; fi
