@@ -1,42 +1,31 @@
-import os, sys
+import os, sys, subprocess
 
 root = sys.argv[1] if len(sys.argv) > 1 else '.haxelib'
-keywords = ["to be compiling", "got Lime", "Lime has to be"]
-found = []
+kw = "Lime has to be"
+hits = []
 for dirpath, dirs, files in os.walk(root):
     for fn in files:
-        if not fn.endswith(('.hx', '.hxp')):
-            continue
         p = os.path.join(dirpath, fn)
-        try:
-            s = open(p, encoding='utf-8', errors='ignore').read()
-        except Exception:
-            continue
-        for kw in keywords:
+        # 文本文件直接 grep
+        if fn.endswith(('.hx', '.hxp', '.json', '.xml', '.hxml', '.txt', '.md')):
+            try:
+                s = open(p, encoding='utf-8', errors='ignore').read()
+            except Exception:
+                continue
             if kw in s:
-                lines = s.split('\n')
-                for i, ln in enumerate(lines):
+                hits.append(p)
+                for i, ln in enumerate(s.split('\n')):
                     if kw in ln:
-                        found.append((p, i + 1, ln.strip()[:200]))
-                        # 打印前后 3 行上下文
-                        ctx = lines[max(0, i - 3):i + 3]
-                        for c in ctx:
-                            print('CTX', p, '=>', c.strip()[:200])
-                        print('---')
-                break
-
-# patch: error/trace/Log.error -> trace（对含关键词行）
-changed = {}
-for p, ln, txt in found:
-    if p not in changed:
-        changed[p] = open(p, encoding='utf-8', errors='ignore').read().split('\n')
-for p, ln, txt in found:
-    lines = changed[p]
-    line = lines[ln - 1]
-    nline = line.replace('Log.error', 'trace').replace('error(', 'trace(').replace('throw ', 'trace ')
-    if nline != line:
-        lines[ln - 1] = nline
-        print('PATCHED', p, ln, '=>', nline.strip()[:150])
-for p, lines in changed.items():
-    open(p, 'w', encoding='utf-8').write('\n'.join(lines))
-print('TOTAL_FOUND:', len(found))
+                        print('TEXT', p, i + 1, ln.strip()[:160])
+        # 二进制用 strings
+        elif fn.endswith(('.n', '.ndll', '.dll', '.so', '.dylib')) or '.' not in fn:
+            try:
+                out = subprocess.run(['strings', p], capture_output=True, text=True, timeout=20).stdout
+            except Exception:
+                continue
+            if kw in out:
+                hits.append(p)
+                for ln in out.split('\n'):
+                    if kw in ln:
+                        print('BIN ', p, ln.strip()[:160])
+print('HITS:', hits)
