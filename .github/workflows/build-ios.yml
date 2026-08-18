@@ -56,6 +56,16 @@ jobs:
           haxelib --always run lime setup || true
           haxelib run lime rebuild hxcpp || true
 
+      - name: Build lime fork ndll from source (hxcpp)
+        run: |
+          set -euxo pipefail
+          cd .haxelib/lime/git
+          git submodule update --init --recursive project/lib 2>&1 | tail -5 || echo 'submodule init warn'
+          cd project
+          haxelib run hxcpp Build.xml -Dmac -DHXCPP_ARM64 2>&1 | tail -40
+          echo '--- ndll output ---'
+          find ../ndll -name "*.ndll" -o -name "*.dll" 2>/dev/null | head
+
       - name: Patch openfl fork (bypass lime fork check)
         run: |
           set -euxo pipefail
