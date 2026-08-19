@@ -99,6 +99,9 @@ class PolymodHandler
     // Create the mod root if it doesn't exist.
     createModRoot();
     #end
+    // Adapt PE-style mods (mods_pe/) into the standard mod root first,
+    // so the official Polymod loader picks them up too.
+    PEModHandler.loadAllPEMods();
     trace('Initializing Polymod (using all mods)...');
     loadModsByDir(getAllModDirs());
   }
