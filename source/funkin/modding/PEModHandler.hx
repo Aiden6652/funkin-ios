@@ -204,9 +204,9 @@ class PEModHandler
     var song:Dynamic = Reflect.field(data, 'song');
     if (song == null) throw 'no "song" field';
 
-    var bpm:Float = Reflect.field(song, 'bpm');
+    var bpm:Null<Float> = Reflect.field(song, 'bpm');
     if (bpm == null) bpm = 100;
-    var speed:Float = Reflect.field(song, 'speed');
+    var speed:Null<Float> = Reflect.field(song, 'speed');
     if (speed == null) speed = 1.0;
 
     // Flatten psych's nested section notes into a single note list
@@ -216,16 +216,16 @@ class PEModHandler
     {
       for (section in sections)
       {
-        var sectionTime:Float = Reflect.field(section, 'strumTime');
+        var sectionTime:Null<Float> = Reflect.field(section, 'strumTime');
         if (sectionTime == null) sectionTime = 0;
         var sectionNotes:Array<Dynamic> = Reflect.field(section, 'notes');
         if (sectionNotes == null) continue;
         for (n in sectionNotes)
         {
           var time:Float = sectionTime + (Reflect.field(n, 'strumTime') ?? 0);
-          var lane:Int = Reflect.field(n, 'lane');
+          var lane:Null<Int> = Reflect.field(n, 'lane');
           if (lane == null) lane = 0;
-          var len:Float = Reflect.field(n, 'sustainLength');
+          var len:Null<Float> = Reflect.field(n, 'sustainLength');
           if (len == null) len = 0;
           var kind:Dynamic = Reflect.field(n, 'noteType');
           if (kind == null || kind == '') kind = null;
