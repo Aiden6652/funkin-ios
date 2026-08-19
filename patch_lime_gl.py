@@ -1,6 +1,8 @@
 import os, sys
 
-# Patch lime fork OpenGLBindings.cpp: stub desktop-GL-only funcs when building for GLES2 (iPhone)
+# Patch lime fork OpenGLBindings.cpp: stub GL symbols missing from the GL header
+# actually included when building for iPhone (desktop GL2 header). Unconditional
+# stubs are fine here - GC-delete helpers are no-ops and only affect cleanup.
 root = sys.argv[1] if len(sys.argv) > 1 else '.haxelib/lime/git/project'
 target = os.path.join(root, 'src/bindings/opengl/OpenGLBindings.cpp')
 if not os.path.exists(target):
@@ -8,19 +10,28 @@ if not os.path.exists(target):
     sys.exit(0)
 
 s = open(target, encoding='utf-8', errors='ignore').read()
-if 'LIME_OPENGL_GLES2' in s and 'STUB_GLES2_DELETE_HELPERS' in s:
+if 'STUB_GL_DELETE_HELPERS' in s:
     print('ALREADY_PATCHED')
     sys.exit(0)
 
 stub = '''
-#if defined(LIME_OPENGL_GLES2)
-/* STUB_GLES2_DELETE_HELPERS - GLES2 headers lack these desktop/GLES3 symbols; GC deletes are no-ops on iOS */
+/* STUB_GL_DELETE_HELPERS - missing GL symbols when building for iPhone */
+#define glIsFramebuffer(x) 0
+#define glDeleteFramebuffers(n, x) ((void)0)
+#define glIsProgram(x) 0
+#define glDeleteProgram(x) ((void)0)
+#define glIsQuery(x) 0
+#define glDeleteQueries(n, x) ((void)0)
 #define glIsRenderbuffer(x) 0
 #define glDeleteRenderbuffers(n, x) ((void)0)
-#define glIsShader(x) 0
-#define glDeleteShader(x) ((void)0)
 #define glIsSampler(x) 0
 #define glDeleteSamplers(n, x) ((void)0)
+#define glIsShader(x) 0
+#define glDeleteShader(x) ((void)0)
+#define glIsTexture(x) 0
+#define glDeleteTextures(n, x) ((void)0)
+#define glIsBuffer(x) 0
+#define glDeleteBuffers(n, x) ((void)0)
 #define glIsSync(x) 0
 #define glDeleteSync(x) ((void)0)
 #define glFenceSync(a, b) ((void*)0)
@@ -32,13 +43,9 @@ stub = '''
 #define glDeleteProgramPipelines(n, x) ((void)0)
 #define glIsTransformFeedback(x) 0
 #define glDeleteTransformFeedbacks(n, x) ((void)0)
-#define glIsTexture(x) 0
-#define glDeleteTextures(n, x) ((void)0)
-#define glIsBuffer(x) 0
-#define glDeleteBuffers(n, x) ((void)0)
-#define glIsFramebuffer(x) 0
-#define glDeleteFramebuffers(n, x) ((void)0)
-#endif
+#define glGenFramebuffers(n, x) ((void)0)
+#define glBindFramebuffer(t, x) ((void)0)
+#define glCheckFramebufferStatus(t) 0
 '''
 
 anchor = '#include <vector>\n'
