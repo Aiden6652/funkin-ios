@@ -38,7 +38,12 @@ class PEModHandler
   public static function loadAllPEMods():Void
   {
     #if sys
-    if (!FileSystem.exists(PE_MOD_FOLDER)) return;
+    if (!FileSystem.exists(PE_MOD_FOLDER))
+    {
+      // Create the PE mod folder so users can drop mods in.
+      FileUtil.createDirIfNotExists(PE_MOD_FOLDER);
+      return;
+    }
 
     var entries:Array<String> = FileSystem.readDirectory(PE_MOD_FOLDER);
     for (entry in entries)
