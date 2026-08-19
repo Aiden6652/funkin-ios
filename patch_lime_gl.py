@@ -26,9 +26,9 @@ stub = '''
 #define glBindSampler(u, x) ((void)0)
 #define glIsSync(x) 0
 #define glDeleteSync(x) ((void)0)
-#define glFenceSync(a, b) ((void*)0)
+#define glFenceSync(a, b) 0
 #define glWaitSync(a, b, c) 0
-#define glClientWaitSync(a, b, c, d) 0
+#define glClientWaitSync(a, b, c) 0
 #define glIsVertexArray(x) 0
 #define glDeleteVertexArrays(n, x) ((void)0)
 #define glBindVertexArray(x) ((void)0)
