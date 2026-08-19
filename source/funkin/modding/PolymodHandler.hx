@@ -51,14 +51,24 @@ class PolymodHandler
   /**
    * Where relative to the executable that mods are located.
    */
-  public static final MOD_FOLDER:String =
-    #if (REDIRECT_ASSETS_FOLDER && mac)
-    '../../../../../../../example_mods'
+  public static var MOD_FOLDER:String = getModsFolder();
+
+  /**
+   * On mobile (iOS), the mods folder lives in the app's Documents directory
+   * so users can drop mods in via the Files app / iTunes file sharing.
+   */
+  static function getModsFolder():String
+  {
+    #if ios
+    return lime.system.System.applicationStorageDirectory + 'mods';
+    #elseif (REDIRECT_ASSETS_FOLDER && mac)
+    return '../../../../../../../example_mods';
     #elseif REDIRECT_ASSETS_FOLDER
-    '../../../../example_mods'
+    return '../../../../example_mods';
     #else
-    'mods'
-    #end;
+    return 'mods';
+    #end
+  }
 
   static final CORE_FOLDER:Null<String> =
     #if (REDIRECT_ASSETS_FOLDER && mac)

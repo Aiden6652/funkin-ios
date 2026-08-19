@@ -82,6 +82,18 @@ jobs:
           APP_PATH=$(find export -name "*.app" -type d | head -1)
           echo "APP_PATH=$APP_PATH"
           if [ -z "$APP_PATH" ]; then echo '=== No .app ==='; find export -maxdepth 6 -type d | head -30; exit 1; fi
+          # Enable iOS file sharing so users can access the app Documents (mods/mods_pe)
+          python3 - <<'PY'
+import re
+p = 'export/release/ios/Funkin/Funkin-Info.plist'
+s = open(p, encoding='utf-8').read()
+if 'UIFileSharingEnabled' not in s:
+    s = s.replace('<dict>', '<dict>\n\t<key>UIFileSharingEnabled</key><true/>\n\t<key>LSSupportsOpeningDocumentsInPlace</key><true/>', 1)
+    open(p, 'w', encoding='utf-8').write(s)
+    print('Info.plist: file sharing enabled')
+else:
+    print('Info.plist: already enabled')
+PY
           mkdir -p Payload
           cp -r "$APP_PATH" "Payload/Funkin.app"
           codesign --force --sign - "Payload/Funkin.app" || true

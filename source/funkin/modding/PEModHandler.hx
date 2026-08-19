@@ -24,8 +24,17 @@ import funkin.util.FileUtil;
  */
 class PEModHandler
 {
-  /** Folder where PE mods are placed. */
-  public static final PE_MOD_FOLDER:String = 'mods_pe';
+  /** Folder where PE mods are placed. On iOS this is in the app Documents. */
+  public static var PE_MOD_FOLDER:String = getPEModFolder();
+
+  static function getPEModFolder():String
+  {
+    #if ios
+    return lime.system.System.applicationStorageDirectory + 'mods_pe';
+    #else
+    return 'mods_pe';
+    #end
+  }
 
   /** Prefix used for adapted mod folders inside the official mod root. */
   public static final ADAPT_PREFIX:String = '_pe_';
